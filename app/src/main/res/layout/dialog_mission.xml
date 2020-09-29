@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:textAlignment="center"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="制定人:"/>
+
+        <TextView
+            android:id="@+id/maker"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:textAlignment="center"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="制作表单时间点:"/>
+
+        <TextView
+            android:id="@+id/makeTime"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:textAlignment="center"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="任务执行时间:"/>
+
+        <TextView
+            android:id="@+id/carryTime"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:textAlignment="center"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="任务截止时间:"/>
+
+        <TextView
+            android:id="@+id/deadline"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:textAlignment="center"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="巡检任务说明:"/>
+
+        <TextView
+            android:id="@+id/comment"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:textAlignment="center"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="巡检人:"/>
+
+        <TextView
+            android:id="@+id/checker"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:textAlignment="center"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="巡检结果:"/>
+
+        <TextView
+            android:id="@+id/result"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:textAlignment="center"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="区域名称:"/>
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:textAlignment="center"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="区域编号:"/>
+
+        <TextView
+            android:id="@+id/code"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+
+
+</TableLayout>

@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="灭火器的编号:"/>
+
+        <TextView
+            android:id="@+id/barcode"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="产品生产日期:"/>
+
+        <TextView
+            android:id="@+id/proructionDate"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="瓶体有效日期:"/>
+
+        <TextView
+            android:id="@+id/validdateOfBody"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="灭火器有效期:"/>
+
+        <TextView
+            android:id="@+id/validdateOfFire"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="生产厂家信息:"/>
+
+        <TextView
+            android:id="@+id/manufacture"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="灭火器的说明:"/>
+
+        <TextView
+            android:id="@+id/comment"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <TableRow>
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="铅封是否完好:"/>
+        <!--定义一组单选纽-->
+        <RadioGroup android:id="@+id/qianfeng" android:orientation="horizontal" android:layout_gravity="center_horizontal">
+            <!--定义两个单选纽-->
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/yes1"
+                android:text="是"
+                android:checked="true"/>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/no1"
+                android:text="否"
+                />
+        </RadioGroup>
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="压力是否正常:"/>
+        <!--定义一组单选纽-->
+        <RadioGroup android:id="@+id/yali" android:orientation="horizontal" android:layout_gravity="center_horizontal">
+            <!--定义两个单选纽-->
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/yes2"
+                android:text="是"
+                android:checked="true"/>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/no2"
+                android:text="否"
+                />
+        </RadioGroup>
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="瓶体是否正常:"/>
+        <!--定义一组单选纽-->
+        <RadioGroup android:id="@+id/pingti" android:orientation="horizontal" android:layout_gravity="center_horizontal">
+            <!--定义两个单选纽-->
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/yes3"
+                android:text="是"
+                android:checked="true"/>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/no3"
+                android:text="否"
+                />
+        </RadioGroup>
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="喷管是否正常:"/>
+        <!--定义一组单选纽-->
+        <RadioGroup android:id="@+id/pengguan" android:orientation="horizontal" android:layout_gravity="center_horizontal">
+            <!--定义两个单选纽-->
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/yes4"
+                android:text="是"
+                android:checked="true"/>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/no4"
+                android:text="否"
+                />
+        </RadioGroup>
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="喷嘴是否正常:"/>
+        <!--定义一组单选纽-->
+        <RadioGroup android:id="@+id/pengzui" android:orientation="horizontal" android:layout_gravity="center_horizontal">
+            <!--定义两个单选纽-->
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/yes5"
+                android:text="是"
+                android:checked="true"/>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/no5"
+                android:text="否"
+                />
+        </RadioGroup>
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="本次操作类型:"/>
+        <!--定义一组单选纽-->
+        <RadioGroup android:id="@+id/operation" android:orientation="horizontal" android:layout_gravity="center_horizontal">
+            <!--定义两个单选纽-->
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/yes6"
+                android:text="无"
+                android:checked="true"/>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/or6"
+                android:text="更换"
+                />
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/no6"
+                android:text="维修"
+                />
+        </RadioGroup>
+
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="喷嘴是否正常:"/>
+        <!--定义一组单选纽-->
+        <RadioGroup android:id="@+id/finished" android:orientation="horizontal" android:layout_gravity="center_horizontal">
+            <!--定义两个单选纽-->
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/yes7"
+                android:text="正常"
+                android:checked="true"/>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/no7"
+                android:text="异常"
+                />
+        </RadioGroup>
+    </TableRow>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="本次巡检时间:"/>
+
+        <TextView
+            android:id="@+id/inspectTime"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="使用位置记录:"/>
+
+        <TextView
+            android:id="@+id/fireId"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="巡检任务序号:"/>
+
+        <TextView
+            android:id="@+id/missionId"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center_vertical"
+        android:baselineAligned="true"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="填写说明备注:"/>
+
+        <EditText
+            android:id="@+id/commentRecord"
+            android:layout_marginLeft="10dp"
+            android:textSize="12sp"
+            android:hint="请填写备注"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+
+
+</TableLayout>

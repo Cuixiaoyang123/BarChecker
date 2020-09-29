@@ -1,0 +1,60 @@
+package com.example.test.shundemo;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Created by DreamLost on 2020/7/13 at 18:08
+ * Description:
+ */
+public class ProcessLayout extends RelativeLayout implements ProcessDirectionLine.LineCallBack, ProcessBox.BoxCallBack {
+    public static final String TAG = "ProcessLayout";
+
+    private Context context;
+    public LinkedHashMap<String,ProcessBox> boxMap;
+    public LinkedHashMap<String,ProcessDirectionLine> lineMap;
+//    public ArrayList<ProcessBox> boxList;
+//    public ArrayList<ProcessDirectionLine> lineList;
+    private Paint linePaint;
+    private ProcessBox downBox, upBox;
+//    private ProcessDirectionLine line;//临时存放新生成的line
+    private float fromPointX, fromPointY, toPointX, toPointY, tempPointX, tempPointY;
+    private static final int ACCURACY_RECOGNIZE = 60;  //手指的识别精度
+    private int type;
+
+    /* 图片控制点
+     * 0---1---2
+     * |       |
+     * 7   8   3
+     * |       |
+     * 6---5---4
+     */
+    public static final int CTR_NONE = -1;
+    public static final int CTR_RIGHT_MID = 3;
+    public static final int CTR_LEFT_MID = 7;
+    public static final int TYPE_NONE = 0;
+    public static final int TYPE

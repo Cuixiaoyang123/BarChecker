@@ -1,0 +1,184 @@
+package com.example.test.shundemo;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Created by DreamLost on 2020/7/13 at 18:08
+ * Description:
+ */
+public class ProcessLayout extends RelativeLayout implements ProcessDirectionLine.LineCallBack, ProcessBox.BoxCallBack {
+    public static final String TAG = "ProcessLayout";
+
+    private Context context;
+    public LinkedHashMap<String,ProcessBox> boxMap;
+    public LinkedHashMap<String,ProcessDirectionLine> lineMap;
+//    public ArrayList<ProcessBox> boxList;
+//    public ArrayList<ProcessDirectionLine> lineList;
+    private Paint linePaint;
+    private ProcessBox downBox, upBox;
+//    private ProcessDirectionLine line;//临时存放新生成的line
+    private float fromPointX, fromPointY, toPointX, toPointY, tempPointX, tempPointY;
+    private static final int ACCURACY_RECOGNIZE = 60;  //手指的识别精度
+    private int type;
+
+    /* 图片控制点
+     * 0---1---2
+     * |       |
+     * 7   8   3
+     * |       |
+     * 6---5---4
+     */
+    public static final int CTR_NONE = -1;
+    public static final int CTR_RIGHT_MID = 3;
+    public static final int CTR_LEFT_MID = 7;
+    public static final int TYPE_NONE = 0;
+    public static final int TYPE_DRAW_LINE = 1;
+    public static final int TYPE_TRANSLATE = 2;
+    private Matrix matrix;
+
+
+    public ProcessLayout(@NonNull Context context) {
+        super(context);
+        this.context = context;
+        init();
+    }
+
+    public ProcessLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        this.context = context;
+        init();
+    }
+
+    public ProcessLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        this.context = context;
+        init();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public ProcessLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        this.context = context;
+        init();
+    }
+
+    private void init() {
+//        boxList = new ArrayList<>();
+//        lineList = new ArrayList<>();
+
+        boxMap = new LinkedHashMap<>();
+        lineMap = new LinkedHashMap<>();
+
+//        matrix = getMatrix();
+//        matrix.postTranslate(200, 100);
+//        setTranslationX(300);
+
+        type = TYPE_NONE;
+
+        linePaint = new Paint();//绘制实线的Paint
+        linePaint.setStyle(Paint.Style.STROKE);
+        linePaint.setStrokeCap(Paint.Cap.SQUARE);
+        linePaint.setColor(Color.GRAY);
+        linePaint.setAntiAlias(true);
+        linePaint.setStrokeWidth(5);
+        linePaint.setPathEffect(new DashPathEffect(new float[]{10, 5}, 0));
+    }
+
+
+        @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+//        lineList.clear();
+//        boxList.clear();
+//        int childCount = getChildCount();
+//
+//        //遍历所有子view 选择Line对象 和 Box对象 分别存储在 lineList 和 boxList中
+//        for (int i = 0; i < childCount; i++) {
+//            View child = getChildAt(i);
+//            if (child instanceof ProcessDirectionLine) {
+//                lineList.add((ProcessDirectionLine) child);
+//            } else if (child instanceof ProcessBox) {
+//                boxList.add((ProcessBox) child);
+//            }
+//        }
+
+//        //实时刷新line的位置
+//        for (ProcessDirectionLine line : lineList) {
+//            float[] preBoxPosis = line.getPreBox().dstPs;
+//            float[] nextBoxPosis = line.getNextBox().dstPs;
+//            line.changeView(preBoxPosis[6],preBoxPosis[7],nextBoxPosis[14],nextBoxPosis[15]);
+//
+//            if (!boxList.contains(line.getNextBox())) {
+//                //说明line的后置节点没有了 需要将这个line删除掉
+//                ProcessBox preBox = line.getPreBox();
+//                preBox.nextLine.remove(line);//从前至节点中把此连线view记录删掉
+//                removeView(line);//将自己从父View中删掉
+//            }
+//        }
+
+        //实时刷新line的位置
+        Iterator<Map.Entry<String, ProcessDirectionLine>> iterator = lineMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            ProcessDirectionLine line = iterator.next().getValue();
+            float[] preBoxPosis = line.getPreBox().dstPs;
+            float[] nextBoxPosis = line.getNextBox().dstPs;
+            line.changeView(preBoxPosis[6],preBoxPosis[7],nextBoxPosis[14],nextBoxPosis[15]);
+            if (!boxMap.containsKey(line.getNextBox().getKey())) {
+                //说明line的后置节点没有了 需要将这个line删除掉
+                ProcessBox preBox = line.getPreBox();
+                preBox.nextLine.remove(line);//从前至节点中把此连线view记录删掉
+                removeView(line);//将自己从父View中删掉
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+
+//        int childCount = getChildCount();
+//        int mTop = 0;
+//        for (int i = 0; i < childCount; i++) {
+//            View childView = getChildAt(i);
+//            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) childView.getLayoutParams();
+//            int mLeft = 0 + lp.leftMargin;
+//            mTop += lp.topMargin;
+//            childView.layout(mLeft, mTop, mLeft + childView.getMeasuredWidth(), mTop + childView.getMeasuredHeight());
+//            mTop += childView.getMeasuredHeight() + lp.bottomMargin;
+//        }
+
+        super.onLayout(changed, l, t, r, b);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        switch (type) {
