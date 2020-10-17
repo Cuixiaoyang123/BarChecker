@@ -34,28 +34,34 @@ public class MissionListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mission_list);
+
         final String[] missions = Utils.getAllSubFiles(dirBase);
-        //在视图中找到ListView
-        listView = (ListView) findViewById(R.id.listView);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,missions);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        if (null != missions) {
+            //在视图中找到ListView
+            listView = (ListView) findViewById(R.id.listView);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, missions);
+            listView.setAdapter(adapter);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                if (checkFileComplete(missions[i])) {
-                    boolean b = exportMission(missions[i]);
-                    if (b) {
-                        justShowMissionDialog(missions[i]);
+                    if (checkFileComplete(missions[i])) {
+                        boolean b = exportMission(missions[i]);
+                        if (b) {
+                            justShowMissionDialog(missions[i]);
+                        }
+
+                    } else {
+                        Toast.makeText(getApplicationContext(), "文件[" + missions[i] + "]不完整", Toast.LENGTH_SHORT).show();
                     }
 
-                } else {
-                    Toast.makeText(getApplicationContext(), "文件[" + missions[i] + "]不完整", Toast.LENGTH_SHORT).show();
                 }
+            });
+        } else {
+            showNormalDialog();
+        }
 
-            }
-        });
     }
 
     private void justShowMissionDialog(final String day) {
@@ -78,6 +84,8 @@ public class MissionListActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(MissionListActivity.this, SearchActivity.class);
                         intent.putExtra("filePath", day);
+                        intent.putExtra("missionId", missionDetailBean.getMissionId());
+                        intent.putExtra("checker", missionDetailBean.getChecker());
                         startActivity(intent);
                     }
                 });
@@ -111,6 +119,28 @@ public class MissionListActivity extends AppCompatActivity {
 
         customizeDialog.show();
 
+    }
+
+    private void showNormalDialog(){
+        /* @setIcon 设置对话框图标
+         * @setTitle 设置对话框标题
+         * @setMessage 设置对话框消息提示
+         * setXXX方法返回Dialog对象，因此可以链式设置属性
+         */
+        final AlertDialog.Builder normalDialog =
+                new AlertDialog.Builder(MissionListActivity.this);
+        normalDialog.setTitle("文件缺失");
+        normalDialog.setCancelable(false);
+        normalDialog.setMessage("请导入文件到[ftmtp]！请您退出应用，导入文件成功后，再次进入应用");
+        normalDialog.setNegativeButton("关闭应用",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.exit(0);
+                    }
+                });
+        // 显示
+        normalDialog.show();
     }
 
     /**

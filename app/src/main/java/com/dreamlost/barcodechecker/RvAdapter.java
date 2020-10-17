@@ -1,6 +1,7 @@
 package com.dreamlost.barcodechecker;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +46,13 @@ public class RvAdapter extends RecyclerView.Adapter<RvAdapter.DataViewHolder> {
     public void onBindViewHolder(DataViewHolder holder, int position) {
         holder.tv_code.setText(bean.get(position).getPositionId().getCode());
         holder.tv_name.setText(bean.get(position).getPositionId().getName());
-        holder.tv_finished.setText(bean.get(position).getFinished()?"已完成":"未完成");
+        if (bean.get(position).getFinished()) {
+            holder.tv_finished.setText("已完成");
+            holder.tv_finished.setBackgroundColor(mContext.getResources().getColor(R.color.colorPreGreen));
+        } else {
+            holder.tv_finished.setText("未完成");
+            holder.tv_finished.setBackgroundColor(mContext.getResources().getColor(R.color.colorAccent));
+        }
     }
 
     //数据总数

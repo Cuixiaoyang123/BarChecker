@@ -1,6 +1,13 @@
 package com.dreamlost.barcodechecker;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,6 +16,7 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by DreamLost on 2020/9/26 at 9:36
@@ -95,7 +103,7 @@ public class Utils {
         Long currentDay = convertTimeToLong(getCurrentDay());
         for (int i = 0; i < files.length; i++) {
             Long subFileDay = convertTimeToLong(files[i].getName());
-            if (subFileDay>=currentDay) {
+            if (subFileDay >= currentDay) {
                 recentFile = files[i].getName();
                 temp = i;
                 break;
@@ -106,7 +114,7 @@ public class Utils {
             for (int i = temp; i < files.length; i++) {
                 Long recentFileDay = convertTimeToLong(recentFile);
                 Long subFileDay = convertTimeToLong(files[i].getName());
-                if (subFileDay>=currentDay && subFileDay<recentFileDay) {
+                if (subFileDay >= currentDay && subFileDay < recentFileDay) {
                     recentFile = files[i].getName();
                 }
             }
@@ -115,5 +123,43 @@ public class Utils {
         return recentFile;
     }
 
+    public static void getLocationInfo(Activity context, double jd, double wd) {
+        String locationProvider;
+
+//        private LocationManager locationManager;
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        // 获取所有可用的位置提供器
+        List<String> providers = locationManager.getProviders(true);
+        if (providers.contains(LocationManager.GPS_PROVIDER)) {
+            // 如果是GPS
+            locationProvider = LocationManager.GPS_PROVIDER;
+        }
+//    else if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+//       // 如果是Network
+//       locationProvider = LocationManager.NETWORK_PROVIDER;
+//    }
+        else {
+            Toast.makeText(context, "没有可用的位置提供器", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // 获取Location
+        PermissionUtils.requestLocationPermission(context);
+        if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
+        Location location = locationManager.getLastKnownLocation(locationProvider);
+        if (location != null) {
+            // 不为空,显示地理位置经纬度
+            jd =location.getLongitude();
+            wd =location.getLatitude();
+        } else {
+            Toast.makeText(context, "GPS未定位到位置", Toast.LENGTH_SHORT).show();
+//            ToastUtils.showToast(this, "GPS未定位到位置");
+//            System.out.println("GPS未定位到位置,请查看是否打开了GPS ？");
+        }
+        // 监视地理位置变化
+//        locationManager.requestLocationUpdates(locationProvider, 2000, 1, locationListener);
+    }
 
 }

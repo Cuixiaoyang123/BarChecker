@@ -1,9 +1,12 @@
 package com.dreamlost.barcodechecker;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 /**
  * Created by DreamLost on 2020/9/22 at 15:19
@@ -46,6 +49,16 @@ public class PermissionUtils {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void requestLocationPermission(Activity activity) {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                Toast.makeText(activity, "您已经拒绝过一次了", Toast.LENGTH_SHORT).show();
+            }
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
     }
 }

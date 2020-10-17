@@ -22,7 +22,7 @@ public class FireRecordBean {
         /**
          * id : 111111111111
          * barcode : 6921168509256
-         * proructionDate : 2020-10-10 10:10:10
+         * productionDate : 2020-10-10 10:10:10
          * validdateOfBody : 2022-10-10 10:10:10
          * validdateOfFire : 2022-10-10 10:10:10
          * manufacture : 农夫山泉灭火器有限公司
@@ -33,7 +33,7 @@ public class FireRecordBean {
 
         private long id;
         private String barcode;
-        private String proructionDate;
+        private String productionDate;
         private String validdateOfBody;
         private String validdateOfFire;
         private String manufacture;
@@ -46,7 +46,7 @@ public class FireRecordBean {
             return "DataBean{" +
                     "id=" + id +
                     ", barcode='" + barcode + '\'' +
-                    ", proructionDate='" + proructionDate + '\'' +
+                    ", productionDate='" + productionDate + '\'' +
                     ", validdateOfBody='" + validdateOfBody + '\'' +
                     ", validdateOfFire='" + validdateOfFire + '\'' +
                     ", manufacture='" + manufacture + '\'' +
@@ -72,12 +72,12 @@ public class FireRecordBean {
             this.barcode = barcode;
         }
 
-        public String getProructionDate() {
-            return proructionDate;
+        public String getProductionDate() {
+            return productionDate;
         }
 
-        public void setProructionDate(String proructionDate) {
-            this.proructionDate = proructionDate;
+        public void setProductionDate(String productionDate) {
+            this.productionDate = productionDate;
         }
 
         public String getValiddateOfBody() {

@@ -28,6 +28,8 @@ public class RecordBean {
     private String inspectTime = "2020-10-10 10:10:10";
     private long fireId;
     private long missionId;
+    private double jd;
+    private double wd;
     private String comment = "无";
 
     @Override
@@ -124,6 +126,22 @@ public class RecordBean {
 
     public void setMissionId(long missionId) {
         this.missionId = missionId;
+    }
+
+    public double getJd() {
+        return jd;
+    }
+
+    public void setJd(double jd) {
+        this.jd = jd;
+    }
+
+    public double getWd() {
+        return wd;
+    }
+
+    public void setWd(double wd) {
+        this.wd = wd;
     }
 
     public String getComment() {

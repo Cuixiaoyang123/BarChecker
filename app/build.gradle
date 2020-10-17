@@ -17,6 +17,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
 }
 
 dependencies {
@@ -28,9 +34,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
     implementation 'com.google.code.gson:gson:2.6.2'
-    implementation 'com.github.yuzhiqiang1993:zxing:2.2.5'
     implementation 'com.android.support:recyclerview-v7:29.1.0'
 
-    implementation project(":lib")
 
 }

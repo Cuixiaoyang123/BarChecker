@@ -1,13 +1,17 @@
 package com.dreamlost.barcodechecker;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
+import android.media.MediaScannerConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -16,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -24,6 +29,7 @@ import android.widget.Toast;
 import com.dreamlost.barcodechecker.bean.FireRecordBean;
 import com.dreamlost.barcodechecker.bean.MissionBean;
 import com.dreamlost.barcodechecker.bean.MissionDetailBean;
+import com.dreamlost.barcodechecker.bean.NewFireRecordBean;
 import com.dreamlost.barcodechecker.bean.RecordBean;
 import com.google.gson.Gson;
 
@@ -34,6 +40,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.net.ServerSocket;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -50,13 +61,20 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     private EditText editText;
     private FireRecordBean fireRecordBean;
     private HashMap<String, FireRecordBean.DataBean> map = new HashMap<>();
-    private long missionId = 222232;
+    private long missionId;
+    private String missionChecker;
     private MissionBean missionBean;
     private MissionDetailBean missionDetailBean;
     private RecyclerView rv;
     private RvAdapter adapter;
     private List<FireRecordBean.DataBean> data;
     private EditText commentRecord;
+    private double jd,wd;
+    private boolean b1 = true,b2 = true, b3=true,b4=true, b5 = true, b6 = true;
+    private TextView productionDate,validdateOfBody, validdateOfFire, tv_complete;
+    private String preTime1 = "",preTime2 = "",preTime3 = "",postTime1 = "",postTime2 = "", postTime3 = "";
+    private String operationType = "";
+    private AlertDialog mDialog;
 
 
     @Override
@@ -65,7 +83,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         setContentView(R.layout.activity_main);
         mContext = this;
 
-        currentDirPath =dirBase + getIntent().getStringExtra("filePath")+"/";
+        currentDirPath = dirBase + getIntent().getStringExtra("filePath") + "/";
+        missionId = getIntent().getLongExtra("missionId",0000);
+        missionChecker = getIntent().getStringExtra("checker");
 
         initView();
 
@@ -100,6 +120,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         || actionId == EditorInfo.IME_ACTION_DONE
                         || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode() && KeyEvent.ACTION_DOWN == event.getAction())) {
                     //处理事件
+                    Utils.getLocationInfo(SearchActivity.this,jd,wd);
+                    Log.i(TAG, "onEditorAction: wd=" + wd + ",jd+" + jd);
                     scanBarcode();
                     return true;
                 }
@@ -127,6 +149,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     private void initView() {
         editText = findViewById(R.id.et_result);
+        tv_complete = findViewById(R.id.tv_complete);
 //        result = findViewById(R.id.tv_result);
 //        text = findViewById(R.id.tv_context);
 //        btn_mission = findViewById(R.id.btn_mission);
@@ -193,6 +216,16 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         return s;
     }
 
+    public String saveNewFireRecord(String name, String content) {
+        String s = saveToLocal(name, content, "newFireRecord");
+        if (s.equals("")) {
+            Toast.makeText(mContext, "Config保存失败", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(mContext, "保存Config成功 path:" + s, Toast.LENGTH_SHORT).show();
+        }
+        return s;
+    }
+
     public String saveToLocal(String name,String content,String path) {
         File dir = null;
         if (currentDirPath.equals("")) {
@@ -214,16 +247,14 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 //创建文件夹
                 dir.mkdirs();
             }
-
-                File file = new File(dir, fileName);
-                OutputStream out = new FileOutputStream(file);
-                out.write(content.getBytes());
-                out.close();
-//                Toast.makeText(mContext, "保存Config成功 path:" + file.getPath(), Toast.LENGTH_SHORT).show();
-                return file.getPath();
+            File file = new File(dir, fileName);
+            OutputStream out = new FileOutputStream(file);
+            out.write(content.getBytes());
+            out.close();
+            MediaScannerConnection.scanFile(mContext,new String[]{file.getAbsolutePath()},null,null);
+            return file.getPath();
         } catch (Exception e) {
             e.printStackTrace();
-//            Toast.makeText(mContext, "Config保存失败", Toast.LENGTH_SHORT).show();
         }
         return "";
     }
@@ -297,6 +328,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
         if (fireRecordBean != null) {
             data = fireRecordBean.getData();
+            int completeNum = resort(data);
+            String s = (data.size()-completeNum)+"个位置未完成，"+completeNum+"个位置已完成";
+            tv_complete.setText(s);
             if (data.size() != 0) {
                 for (FireRecordBean.DataBean sub : data) {
                     String key = sub.getBarcode();
@@ -400,42 +434,36 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     private void showFireDialog(final FireRecordBean.DataBean dataBean, final RecordBean recordBean) {
 
-        AlertDialog.Builder customizeDialog =
+        final AlertDialog.Builder customizeDialog =
                 new AlertDialog.Builder(SearchActivity.this);
         final View dialogView = LayoutInflater.from(SearchActivity.this)
                 .inflate(R.layout.dialog_fire,null);
         customizeDialog.setTitle("请仔细核查灭火器的相关信息");
         customizeDialog.setView(dialogView);
-        customizeDialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
-        customizeDialog.setPositiveButton("确定",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        adapter.notifyDataSetChanged();
-                        dataBean.setFinished(true);
-                        recordBean.setComment(commentRecord.getText().toString().trim());
-                        //保存Json到本地
-                        String content = new Gson().toJson(recordBean);
-                        saveInspect(dataBean.getBarcode(), content);
-                    }
-                });
 
         TextView barcode = dialogView.findViewById(R.id.barcode);
         barcode.setText(dataBean.getBarcode());
 
-        TextView proructionDate = dialogView.findViewById(R.id.proructionDate);
-        proructionDate.setText(dataBean.getProructionDate());
+        productionDate = dialogView.findViewById(R.id.productionDate);
+        preTime1 = dataBean.getProductionDate();
+        productionDate.setText(dataBean.getProductionDate());
 
-        TextView validdateOfBody = dialogView.findViewById(R.id.validdateOfBody);
+        validdateOfBody = dialogView.findViewById(R.id.validdateOfBody);
+        preTime2 = dataBean.getValiddateOfBody();
         validdateOfBody.setText(dataBean.getValiddateOfBody());
 
-        TextView validdateOfFire = dialogView.findViewById(R.id.validdateOfFire);
+        validdateOfFire = dialogView.findViewById(R.id.validdateOfFire);
+        preTime3 = dataBean.getValiddateOfFire();
         validdateOfFire.setText(dataBean.getValiddateOfFire());
+
+        final RadioGroup status = dialogView.findViewById(R.id.finished);
+        status.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                String b = i == R.id.yes7 ? "正常" : "异常";
+                recordBean.setStatus(b);
+            }
+        });
 
         TextView manufacture = dialogView.findViewById(R.id.manufacture);
         manufacture.setText(dataBean.getManufacture());
@@ -447,8 +475,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         qianfeng.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                boolean b = i == R.id.yes1 ;
-                recordBean.setQianfeng(b);
+                b1 = i == R.id.yes1;
+                if (!b1) {
+                    status.check(R.id.no7);
+                } else if (b1 && b2 && b3 && b4 && b5 && b6) {
+                    status.check(R.id.yes7);
+                }
+                recordBean.setQianfeng(b1);
             }
         });
 
@@ -456,8 +489,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         yali.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                boolean b = i == R.id.yes2;
-                recordBean.setYali(b);
+                b2 = i == R.id.yes2;
+                if (!b2) {
+                    status.check(R.id.no7);
+                } else if (b1 && b2 && b3 && b4 && b5 && b6) {
+                    status.check(R.id.yes7);
+                }
+                recordBean.setYali(b2);
             }
         });
 
@@ -465,8 +503,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         pingti.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                boolean b = i == R.id.yes3;
-                recordBean.setPingti(b);
+                b3 = i == R.id.yes3;
+                if (!b3) {
+                    status.check(R.id.no7);
+                } else if (b1 && b2 && b3 && b4 && b5 && b6) {
+                    status.check(R.id.yes7);
+                }
+                recordBean.setPingti(b3);
             }
         });
 
@@ -474,8 +517,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         pengguan.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                boolean b = i == R.id.yes4;
-                recordBean.setPenguan(b);
+                b4 = i == R.id.yes4;
+                if (!b4) {
+                    status.check(R.id.no7);
+                } else if (b1 && b2 && b3 && b4 && b5 && b6) {
+                    status.check(R.id.yes7);
+                }
+                recordBean.setPenguan(b4);
             }
         });
 
@@ -483,39 +531,64 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         pengzui.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                boolean b = i == R.id.yes5;
-                recordBean.setPenzui(b);
+                b5 = i == R.id.yes5;
+                if (!b5) {
+                    status.check(R.id.no7);
+                } else if (b1 && b2 && b3 && b4 && b5 && b6) {
+                    status.check(R.id.yes7);
+                }
+                recordBean.setPenzui(b5);
             }
         });
 
         RadioGroup operation = dialogView.findViewById(R.id.operation);
+        operationType = "无";
         operation.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                String b = "";
                 switch (i) {
                     case R.id.yes6:
-                        b = "无";
+                        b6 = true;
+                        operationType = "无";
+                        productionDate.setEnabled(false);
+                        validdateOfBody.setEnabled(false);
+                        validdateOfFire.setEnabled(false);
+                        productionDate.setText(preTime1);
+                        validdateOfBody.setText(preTime2);
+                        validdateOfFire.setText(preTime3);
+                        if (b1 && b2 && b3 && b4 && b5 && b6) {
+                        status.check(R.id.yes7);
+                        }
                         break;
                     case R.id.or6:
-                        b = "更换";
+                        operationType = "更换";
+                        b6 = false;
+                        Toast.makeText(mContext, "请选择更换的时间", Toast.LENGTH_SHORT).show();
+                        productionDate.setText("选择时间");
+                        productionDate.setEnabled(true);
+                        validdateOfBody.setText("选择时间");
+                        validdateOfBody.setEnabled(true);
+                        validdateOfFire.setText("选择时间");
+                        validdateOfFire.setEnabled(true);
+                        status.check(R.id.no7);
                         break;
                     case R.id.no6:
-                        b = "维修";
+                        operationType = "维修";
+                        b6 = false;
+                        productionDate.setEnabled(false);
+                        validdateOfBody.setEnabled(false);
+                        validdateOfFire.setEnabled(false);
+                        productionDate.setText(preTime1);
+                        validdateOfBody.setText(preTime2);
+                        validdateOfFire.setText(preTime3);
+                        status.check(R.id.no7);
                         break;
                 }
-                recordBean.setOperation(b);
+                recordBean.setOperation(operationType);
             }
         });
 
-        RadioGroup status = dialogView.findViewById(R.id.finished);
-        status.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                String b = i == R.id.yes7 ? "正常" : "异常";
-                recordBean.setStatus(b);
-            }
-        });
+
 
         TextView inspectTime = dialogView.findViewById(R.id.inspectTime);
         String time = Utils.getCurrentSecond();
@@ -531,7 +604,125 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         commentRecord = dialogView.findViewById(R.id.commentRecord);
         commentRecord.setText(String.valueOf(recordBean.getComment()));
 
-        customizeDialog.show();
+        mDialog = customizeDialog.setPositiveButton("确定", null).setNegativeButton("取消", null).create();
+        mDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button positionButton=mDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                Button negativeButton=mDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+                positionButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (operationType.equals("更换")) {
+                            if (postTime1.equals("") || postTime2.equals("") || postTime3.equals("")) {
+                                Toast.makeText(mContext, "请选择时间", Toast.LENGTH_SHORT).show();
+                            } else {
+                                dataBean.setFinished(true);
+                                int completeNum = resort(data);
+                                String s = (data.size()-completeNum)+"个位置未完成，"+completeNum+"个位置已完成";
+                                tv_complete.setText(s);
+                                adapter.notifyDataSetChanged();
+                                recordBean.setJd(jd);
+                                recordBean.setWd(wd);
+                                recordBean.setComment(commentRecord.getText().toString().trim());
+                                //保存Json到本地
+                                String content = new Gson().toJson(recordBean);
+                                saveInspect(dataBean.getBarcode(), content);
+
+                                //保存NewFireRecord.Json到本地
+                                NewFireRecordBean newFireRecordBean = new NewFireRecordBean();
+                                newFireRecordBean.setId(dataBean.getId());
+                                newFireRecordBean.setBarcode(dataBean.getBarcode());
+                                newFireRecordBean.setProductionDate(postTime1);
+                                newFireRecordBean.setValiddateOfBody(postTime2);
+                                newFireRecordBean.setValiddateOfFire(postTime3);
+                                newFireRecordBean.setManufacture(dataBean.getManufacture());
+                                newFireRecordBean.setFinished(true);
+                                newFireRecordBean.setDeployer(missionChecker);
+                                newFireRecordBean.setDeployDate(Utils.getCurrentDay());
+                                newFireRecordBean.setComment(dataBean.getComment());
+                                newFireRecordBean.setPositionId(dataBean.getPositionId());
+
+                                String content1 = new Gson().toJson(newFireRecordBean);
+                                saveNewFireRecord(dataBean.getBarcode(), content1);
+                                mDialog.dismiss();
+                            }
+                        } else {
+                            dataBean.setFinished(true);
+                            int completeNum = resort(data);
+                            String s = (data.size()-completeNum)+"个位置未完成，"+completeNum+"个位置已完成";
+                            tv_complete.setText(s);
+                            adapter.notifyDataSetChanged();
+                            recordBean.setJd(jd);
+                            recordBean.setWd(wd);
+                            recordBean.setComment(commentRecord.getText().toString().trim());
+                            //保存Json到本地
+                            String content = new Gson().toJson(recordBean);
+                            saveInspect(dataBean.getBarcode(), content);
+                            mDialog.dismiss();
+                        }
+                    }
+                });
+                negativeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+//                        Toast.makeText(SearchActivity.this,"取消",Toast.LENGTH_SHORT).show();
+//                        mDialog.dismiss();
+                    }
+                });
+
+            }
+        });
+        mDialog.show();
+
+//        customizeDialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int i) {
+//
+//            }
+//        });
+//
+//        customizeDialog.setPositiveButton("确定",
+//                new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        if (operationType.equals("更换")) {
+//                            if (postTime1.equals("") || postTime2.equals("") || postTime3.equals("")) {
+//                                Toast.makeText(mContext, "请选择时间", Toast.LENGTH_SHORT).show();
+//                            }
+//                        } else {
+//                            adapter.notifyDataSetChanged();
+//                            dataBean.setFinished(true);
+//                            recordBean.setJd(jd);
+//                            recordBean.setWd(wd);
+//                            recordBean.setComment(commentRecord.getText().toString().trim());
+//                            //保存Json到本地
+//                            String content = new Gson().toJson(recordBean);
+//                            saveInspect(dataBean.getBarcode(), content);
+//                        }
+//                    }
+//                });
+
+    }
+
+
+    private int resort(List<FireRecordBean.DataBean> list) {
+        int num = 0;
+        Collections.sort(list,(o1,o2)->{
+                    if (o1.getFinished()) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+        });
+        for (FireRecordBean.DataBean dataBean : list) {
+            if (dataBean.getFinished()) {
+                num++;
+            }
+        }
+
+        return num;
+
     }
 
     /**
@@ -562,4 +753,51 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         missionDetailBean = new Gson().fromJson(missionDetailJson, MissionDetailBean.class);
         return true;
     }
+
+    public void time1(View view) {
+        Calendar calendar = Calendar.getInstance();
+        new DatePickerDialog(SearchActivity.this,
+            new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                    postTime1 = year + "-" + month + "-" + dayOfMonth + " 08:00:00";
+                    productionDate.setText(postTime1);
+                }
+            }
+            , calendar.get(Calendar.YEAR)
+            , calendar.get(Calendar.MONTH)
+            , calendar.get(Calendar.DAY_OF_MONTH)).show();
+
+    }
+    public void time2(View view) {
+        Calendar calendar = Calendar.getInstance();
+        new DatePickerDialog(SearchActivity.this,
+            new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) { postTime2 = year + "-" + month + "-" + dayOfMonth + " 08:00:00";
+                    validdateOfBody.setText(postTime2);
+                }
+            }
+            , calendar.get(Calendar.YEAR)
+            , calendar.get(Calendar.MONTH)
+            , calendar.get(Calendar.DAY_OF_MONTH)).show();
+
+    }
+    public void time3(View view) {
+        Calendar calendar = Calendar.getInstance();
+        new DatePickerDialog(SearchActivity.this,
+            new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                    postTime3 = year + "-" + month + "-" + dayOfMonth + " 08:00:00";
+                    validdateOfFire.setText(postTime3);
+                }
+            }
+            , calendar.get(Calendar.YEAR)
+            , calendar.get(Calendar.MONTH)
+            , calendar.get(Calendar.DAY_OF_MONTH)).show();
+
+    }
+
+
 }

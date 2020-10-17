@@ -27,6 +27,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/ll_time1"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:orientation="horizontal">
@@ -39,15 +40,18 @@
             android:text="产品生产日期:"/>
 
         <TextView
-            android:id="@+id/proructionDate"
+            android:id="@+id/productionDate"
             android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
-            android:layout_width="wrap_content"
+            android:onClick="time1"
+            android:enabled="false"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"/>
 
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/ll_time2"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:orientation="horizontal">
@@ -63,12 +67,16 @@
             android:id="@+id/validdateOfBody"
             android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
-            android:layout_width="wrap_content"
+            android:onClick="time2"
+            android:enabled="false"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"/>
 
     </LinearLayout>
 
     <LinearLayout
+
+        android:id="@+id/ll_time3"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:orientation="horizontal">
@@ -84,7 +92,9 @@
             android:id="@+id/validdateOfFire"
             android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
-            android:layout_width="wrap_content"
+            android:enabled="false"
+            android:onClick="time3"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"/>
 
     </LinearLayout>
@@ -294,7 +304,7 @@
             android:layout_marginLeft="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="喷嘴是否正常:"/>
+            android:text="状态是否正常:"/>
         <!--定义一组单选纽-->
         <RadioGroup android:id="@+id/finished" android:orientation="horizontal" android:layout_gravity="center_horizontal">
             <!--定义两个单选纽-->
@@ -303,11 +313,13 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/yes7"
                 android:text="正常"
+                android:enabled="false"
                 android:checked="true"/>
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/no7"
+                android:enabled="false"
                 android:text="异常"
                 />
         </RadioGroup>
