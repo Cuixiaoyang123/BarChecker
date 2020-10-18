@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -123,9 +124,9 @@ public class Utils {
         return recentFile;
     }
 
-    public static void getLocationInfo(Activity context, double jd, double wd) {
+    public static List<Double> getLocationInfo(Activity context) {
         String locationProvider;
-
+        ArrayList<Double> list = new ArrayList<>();
 //        private LocationManager locationManager;
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         // 获取所有可用的位置提供器
@@ -140,22 +141,26 @@ public class Utils {
 //    }
         else {
             Toast.makeText(context, "没有可用的位置提供器", Toast.LENGTH_SHORT).show();
-            return;
+            return null;
         }
         // 获取Location
         PermissionUtils.requestLocationPermission(context);
         if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            return;
+            return null ;
         }
         Location location = locationManager.getLastKnownLocation(locationProvider);
         if (location != null) {
             // 不为空,显示地理位置经纬度
-            jd =location.getLongitude();
-            wd =location.getLatitude();
+            double jd =location.getLongitude();
+            double wd =location.getLatitude();
+            Toast.makeText(context, "位置jd="+jd+",wd="+wd, Toast.LENGTH_SHORT).show();
+            list.add(jd);
+            list.add(wd);
+            return list;
         } else {
-            Toast.makeText(context, "GPS未定位到位置", Toast.LENGTH_SHORT).show();
-//            ToastUtils.showToast(this, "GPS未定位到位置");
+            Toast.makeText(context, "GPS未定位到位置,请查看是否打开了GPS ", Toast.LENGTH_SHORT).show();
+            return null;
 //            System.out.println("GPS未定位到位置,请查看是否打开了GPS ？");
         }
         // 监视地理位置变化

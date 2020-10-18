@@ -120,8 +120,10 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         || actionId == EditorInfo.IME_ACTION_DONE
                         || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode() && KeyEvent.ACTION_DOWN == event.getAction())) {
                     //处理事件
-                    Utils.getLocationInfo(SearchActivity.this,jd,wd);
-                    Log.i(TAG, "onEditorAction: wd=" + wd + ",jd+" + jd);
+                    List<Double> locationInfo = Utils.getLocationInfo(SearchActivity.this);
+                    if (locationInfo != null) {
+                        Log.i(TAG, "onEditorAction: wd=" + locationInfo.get(1) + ",jd+" + locationInfo.get(0));
+                    }
                     scanBarcode();
                     return true;
                 }
@@ -640,7 +642,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                                 newFireRecordBean.setFinished(true);
                                 newFireRecordBean.setDeployer(missionChecker);
                                 newFireRecordBean.setDeployDate(Utils.getCurrentDay());
-                                newFireRecordBean.setComment(dataBean.getComment());
+                                newFireRecordBean.setComment(recordBean.getComment());
                                 newFireRecordBean.setPositionId(dataBean.getPositionId());
 
                                 String content1 = new Gson().toJson(newFireRecordBean);
@@ -667,7 +669,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                     @Override
                     public void onClick(View v) {
 //                        Toast.makeText(SearchActivity.this,"取消",Toast.LENGTH_SHORT).show();
-//                        mDialog.dismiss();
+                        mDialog.dismiss();
                     }
                 });
 
