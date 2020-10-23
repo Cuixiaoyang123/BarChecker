@@ -96,6 +96,8 @@ public class NewFireRecordBean {
         this.comment = comment;
     }
 
+
+
     public FireRecordBean.DataBean.PositionIdBean getPositionId() {
         return positionId;
     }

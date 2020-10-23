@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="30dp"
@@ -101,19 +103,22 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="34dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
-            android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="生产厂家信息:"/>
 
-        <TextView
+        <EditText
             android:id="@+id/manufacture"
-            android:layout_marginTop="7dp"
+            android:inputType="text"
+            android:lines="1"
+            android:enabled="false"
+            android:textSize="12sp"
             android:layout_marginLeft="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -122,19 +127,22 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="34dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
-            android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="灭火器的说明:"/>
 
-        <TextView
+        <EditText
             android:id="@+id/comment"
-            android:layout_marginTop="7dp"
+            android:inputType="text"
+            android:lines="1"
+            android:enabled="false"
+            android:textSize="12sp"
             android:layout_marginLeft="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -390,13 +398,12 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="34dp"
         android:gravity="center_vertical"
         android:baselineAligned="true"
         android:orientation="horizontal">
 
         <TextView
-            android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -411,6 +418,9 @@
             android:layout_height="wrap_content"/>
 
     </LinearLayout>
+
+
+
 
 
 

@@ -5,11 +5,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,6 +49,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -73,10 +81,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     private boolean b1 = true,b2 = true, b3=true,b4=true, b5 = true, b6 = true;
     private TextView productionDate,validdateOfBody, validdateOfFire, tv_complete;
     private String preTime1 = "",preTime2 = "",preTime3 = "",postTime1 = "",postTime2 = "", postTime3 = "";
-    private String operationType = "";
+    private String operationType = "", manufactureText = "", commentText ="";
     private AlertDialog mDialog;
+    private EditText manufacture, comment;
+    private LocationManager locationManager;
 
 
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +101,37 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         initView();
 
         importFiles();
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager != null) {
+            @SuppressLint("MissingPermission")
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 8, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    double jd =location.getLongitude();
+                    double wd =location.getLatitude();
+                    Toast.makeText(mContext, "位置jd="+jd+",wd="+wd, Toast.LENGTH_SHORT).show();
+
+                }
+
+                @Override
+                public void onStatusChanged(String s, int i, Bundle bundle) {
+                    Toast.makeText(mContext, "onStatusChanged="+s+", "+i, Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onProviderEnabled(String s) {
+                    Toast.makeText(mContext, "onProviderEnabled="+s, Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onProviderDisabled(String s) {
+                    Toast.makeText(mContext, "onProviderDisabled="+s, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         adapter = new RvAdapter(this,data);
         rv.setAdapter(adapter);
@@ -120,10 +162,15 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         || actionId == EditorInfo.IME_ACTION_DONE
                         || (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode() && KeyEvent.ACTION_DOWN == event.getAction())) {
                     //处理事件
-                    List<Double> locationInfo = Utils.getLocationInfo(SearchActivity.this);
-                    if (locationInfo != null) {
-                        Log.i(TAG, "onEditorAction: wd=" + locationInfo.get(1) + ",jd+" + locationInfo.get(0));
+//                    List<Double> locationInfo = Utils.getLocationInfo(SearchActivity.this);
+//                    if (locationInfo != null) {
+//                        Log.i(TAG, "onEditorAction: wd=" + locationInfo.get(1) + ",jd+" + locationInfo.get(0));
+//                    }
+                    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    if (location != null) {
+                        Log.i(TAG, "onEditorAction: jd=" + location.getLongitude() + ",wd+" + location.getLatitude());
                     }
+
                     scanBarcode();
                     return true;
                 }
@@ -201,9 +248,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public String saveMissionDetail(String name, String content) {
         String s = saveToLocal(name, content, "missionDetail");
         if (s.equals("")) {
-            Toast.makeText(mContext, "Config保存失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "missionDetail保存失败", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(mContext, "保存Config成功 path:" + s, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(mContext, "检查已完成", Toast.LENGTH_SHORT).show();
         }
         return s;
     }
@@ -211,9 +258,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public String saveInspect(String name, String content) {
         String s = saveToLocal(name, content, "inspect");
         if (s.equals("")) {
-            Toast.makeText(mContext, "Config保存失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "inspect保存失败", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(mContext, "保存Config成功 path:" + s, Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "检查已完成", Toast.LENGTH_SHORT).show();
         }
         return s;
     }
@@ -221,9 +268,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public String saveNewFireRecord(String name, String content) {
         String s = saveToLocal(name, content, "newFireRecord");
         if (s.equals("")) {
-            Toast.makeText(mContext, "Config保存失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "newFireRecord保存失败", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(mContext, "保存Config成功 path:" + s, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(mContext, "检查已完成", Toast.LENGTH_SHORT).show();
         }
         return s;
     }
@@ -467,10 +514,12 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
 
-        TextView manufacture = dialogView.findViewById(R.id.manufacture);
+        manufacture = dialogView.findViewById(R.id.manufacture);
+        manufactureText = dataBean.getManufacture();
         manufacture.setText(dataBean.getManufacture());
 
-        TextView comment = dialogView.findViewById(R.id.comment);
+        comment = dialogView.findViewById(R.id.comment);
+        commentText = dataBean.getComment();
         comment.setText(dataBean.getComment());
 
         RadioGroup qianfeng = dialogView.findViewById(R.id.qianfeng);
@@ -551,20 +600,27 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 switch (i) {
                     case R.id.yes6:
                         b6 = true;
+                        if (b1 && b2 && b3 && b4 && b5 && b6) {
+                            status.check(R.id.yes7);
+                        }
                         operationType = "无";
+                        manufacture.setEnabled(false);
+                        manufacture.setText(manufactureText);
+                        comment.setEnabled(false);
+                        comment.setText(commentText);
                         productionDate.setEnabled(false);
                         validdateOfBody.setEnabled(false);
                         validdateOfFire.setEnabled(false);
                         productionDate.setText(preTime1);
                         validdateOfBody.setText(preTime2);
                         validdateOfFire.setText(preTime3);
-                        if (b1 && b2 && b3 && b4 && b5 && b6) {
-                        status.check(R.id.yes7);
-                        }
                         break;
                     case R.id.or6:
-                        operationType = "更换";
                         b6 = false;
+                        status.check(R.id.no7);
+                        operationType = "更换";
+                        manufacture.setEnabled(true);
+                        comment.setEnabled(true);
                         Toast.makeText(mContext, "请选择更换的时间", Toast.LENGTH_SHORT).show();
                         productionDate.setText("选择时间");
                         productionDate.setEnabled(true);
@@ -572,18 +628,21 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         validdateOfBody.setEnabled(true);
                         validdateOfFire.setText("选择时间");
                         validdateOfFire.setEnabled(true);
-                        status.check(R.id.no7);
                         break;
                     case R.id.no6:
-                        operationType = "维修";
                         b6 = false;
+                        status.check(R.id.no7);
+                        operationType = "维修";
+                        manufacture.setEnabled(false);
+                        manufacture.setText(manufactureText);
+                        comment.setEnabled(false);
+                        comment.setText(commentText);
                         productionDate.setEnabled(false);
                         validdateOfBody.setEnabled(false);
                         validdateOfFire.setEnabled(false);
                         productionDate.setText(preTime1);
                         validdateOfBody.setText(preTime2);
                         validdateOfFire.setText(preTime3);
-                        status.check(R.id.no7);
                         break;
                 }
                 recordBean.setOperation(operationType);
@@ -638,11 +697,11 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                                 newFireRecordBean.setProductionDate(postTime1);
                                 newFireRecordBean.setValiddateOfBody(postTime2);
                                 newFireRecordBean.setValiddateOfFire(postTime3);
-                                newFireRecordBean.setManufacture(dataBean.getManufacture());
+                                newFireRecordBean.setManufacture(manufacture.getText().toString().trim());
                                 newFireRecordBean.setFinished(true);
                                 newFireRecordBean.setDeployer(missionChecker);
                                 newFireRecordBean.setDeployDate(Utils.getCurrentDay());
-                                newFireRecordBean.setComment(recordBean.getComment());
+                                newFireRecordBean.setComment(comment.getText().toString().trim());
                                 newFireRecordBean.setPositionId(dataBean.getPositionId());
 
                                 String content1 = new Gson().toJson(newFireRecordBean);
@@ -762,7 +821,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                    postTime1 = year + "-" + month + "-" + dayOfMonth + " 08:00:00";
+                    postTime1 = year + "-" + (month+1) + "-" + dayOfMonth + " 08:00:00";
                     productionDate.setText(postTime1);
                 }
             }
@@ -776,7 +835,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         new DatePickerDialog(SearchActivity.this,
             new DatePickerDialog.OnDateSetListener() {
                 @Override
-                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) { postTime2 = year + "-" + month + "-" + dayOfMonth + " 08:00:00";
+                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                    postTime2 = year + "-" + (month + 1) + "-" + dayOfMonth + " 08:00:00";
                     validdateOfBody.setText(postTime2);
                 }
             }
@@ -791,7 +851,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                    postTime3 = year + "-" + month + "-" + dayOfMonth + " 08:00:00";
+                    postTime3 = year + "-" + (month+1) + "-" + dayOfMonth + " 08:00:00";
                     validdateOfFire.setText(postTime3);
                 }
             }
@@ -801,5 +861,71 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+    public static List<Double> getLocationInfo(Activity context) {
+        String locationProvider;
+        ArrayList<Double> list = new ArrayList<>();
+//        private LocationManager locationManager;
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        // 获取所有可用的位置提供器
+        List<String> providers = locationManager.getProviders(true);
+        if (providers.contains(LocationManager.GPS_PROVIDER)) {
+            // 如果是GPS
+            locationProvider = LocationManager.GPS_PROVIDER;
+        }
+//    else if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+//       // 如果是Network
+//       locationProvider = LocationManager.NETWORK_PROVIDER;
+//    }
+        else {
+            Toast.makeText(context, "没有可用的位置提供器", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        // 获取Location
+        PermissionUtils.requestLocationPermission(context);
+        if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return null ;
+        }
+        // 监视地理位置变化
+        locationManager.requestLocationUpdates(locationProvider, 2000, 1, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                double jd =location.getLongitude();
+                double wd =location.getLatitude();
+                Toast.makeText(context, "位置jd="+jd+",wd="+wd, Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+                Toast.makeText(context, "onStatusChanged="+s+", "+i, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+                Toast.makeText(context, "onProviderEnabled="+s, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+                Toast.makeText(context, "onProviderDisabled="+s, Toast.LENGTH_SHORT).show();
+            }
+        });
+        Location location = locationManager.getLastKnownLocation(locationProvider);
+        if (location != null) {
+            // 不为空,显示地理位置经纬度
+            double jd =location.getLongitude();
+            double wd =location.getLatitude();
+            Toast.makeText(context, "位置jd="+jd+",wd="+wd, Toast.LENGTH_SHORT).show();
+            list.add(jd);
+            list.add(wd);
+            return list;
+        } else {
+            Toast.makeText(context, "室内GPS信号差", Toast.LENGTH_SHORT).show();
+            return null;
+//            System.out.println("GPS未定位到位置,请查看是否打开了GPS ？");
+        }
+
+    }
 
 }

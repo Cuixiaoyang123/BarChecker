@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -149,6 +151,31 @@ public class Utils {
 
             return null ;
         }
+        // 监视地理位置变化
+        locationManager.requestLocationUpdates(locationProvider, 2000, 1, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                double jd =location.getLongitude();
+                double wd =location.getLatitude();
+                Toast.makeText(context, "位置jd="+jd+",wd="+wd, Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+                Toast.makeText(context, "onStatusChanged="+s+", "+i, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+                Toast.makeText(context, "onProviderEnabled="+s, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+                Toast.makeText(context, "onProviderDisabled="+s, Toast.LENGTH_SHORT).show();
+            }
+        });
         Location location = locationManager.getLastKnownLocation(locationProvider);
         if (location != null) {
             // 不为空,显示地理位置经纬度
@@ -159,12 +186,11 @@ public class Utils {
             list.add(wd);
             return list;
         } else {
-            Toast.makeText(context, "GPS未定位到位置,请查看是否打开了GPS ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "室内GPS信号差", Toast.LENGTH_SHORT).show();
             return null;
 //            System.out.println("GPS未定位到位置,请查看是否打开了GPS ？");
         }
-        // 监视地理位置变化
-//        locationManager.requestLocationUpdates(locationProvider, 2000, 1, locationListener);
+
     }
 
 }

@@ -1,6 +1,8 @@
 package com.dreamlost.barcodechecker;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -12,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,14 +23,20 @@ import com.dreamlost.barcodechecker.bean.MissionDetailBean;
 import com.google.gson.Gson;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MissionListActivity extends AppCompatActivity {
     private static final String TAG = "MissionListActivity";
     private String dirBase = Environment.getExternalStorageDirectory().getAbsolutePath() + "/ftmtp/";
-    private ListView listView;
+    private RecyclerView listView;
     private String currentDirPath;
+    private List<String> currentDataPathList = new ArrayList<>();
+    private Adapter adapter;
     private MissionBean missionBean;
+    private List<MissionBean> missionBeanList = new ArrayList<>();
     private MissionDetailBean missionDetailBean;
+    private List<MissionDetailBean> missionDetailBeanList = new ArrayList<>();
 
 
     @Override
@@ -36,90 +45,101 @@ public class MissionListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_mission_list);
 
         final String[] missions = Utils.getAllSubFiles(dirBase);
+
         if (null != missions) {
-            //在视图中找到ListView
-            listView = (ListView) findViewById(R.id.listView);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, missions);
-            listView.setAdapter(adapter);
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                    if (checkFileComplete(missions[i])) {
-                        boolean b = exportMission(missions[i]);
-                        if (b) {
-                            justShowMissionDialog(missions[i]);
-                        }
-
-                    } else {
-                        Toast.makeText(getApplicationContext(), "文件[" + missions[i] + "]不完整", Toast.LENGTH_SHORT).show();
-                    }
-
+            for (int i = 0; i < missions.length; i++) {
+                if (checkFileComplete(missions[i])) {
+                    exportMission(missions[i]);
+                    currentDataPathList.add(missions[i]);
                 }
-            });
+            }
+
+            //在视图中找到ListView
+            listView = (RecyclerView) findViewById(R.id.listView);
+            //设置布局管理器
+            listView.setLayoutManager(new LinearLayoutManager(this));//线性
+             adapter = new Adapter(this,currentDataPathList,missionBeanList,missionDetailBeanList);
+            listView.setAdapter(adapter);
+
+//            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//
+//                @Override
+//                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//
+//                    if (checkFileComplete(missions[i])) {
+//                        boolean b = exportMission(missions[i]);
+//                        if (b) {
+//                            justShowMissionDialog(missions[i]);
+//                        }
+//
+//                    } else {
+//                        Toast.makeText(getApplicationContext(), "文件[" + missions[i] + "]不完整", Toast.LENGTH_SHORT).show();
+//                    }
+//
+//                }
+//            });
         } else {
             showNormalDialog();
         }
 
     }
 
-    private void justShowMissionDialog(final String day) {
-
-        AlertDialog.Builder customizeDialog =
-                new AlertDialog.Builder(MissionListActivity.this);
-        final View dialogView = LayoutInflater.from(MissionListActivity.this)
-                .inflate(R.layout.dialog_mission,null);
-        customizeDialog.setTitle("请核查此次巡检任务的相关信息");
-        customizeDialog.setView(dialogView);
-        customizeDialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
-        customizeDialog.setPositiveButton("开始巡检",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(MissionListActivity.this, SearchActivity.class);
-                        intent.putExtra("filePath", day);
-                        intent.putExtra("missionId", missionDetailBean.getMissionId());
-                        intent.putExtra("checker", missionDetailBean.getChecker());
-                        startActivity(intent);
-                    }
-                });
-
-        TextView maker = dialogView.findViewById(R.id.maker);
-        maker.setText(missionBean.getMaker());
-
-        TextView makeTime = dialogView.findViewById(R.id.makeTime);
-        makeTime.setText(missionBean.getMakeTime());
-
-        TextView carryTime = dialogView.findViewById(R.id.carryTime);
-        carryTime.setText(missionBean.getCarryTime());
-
-        TextView deadline = dialogView.findViewById(R.id.deadline);
-        deadline.setText(missionBean.getDeadline());
-
-        TextView comment = dialogView.findViewById(R.id.comment);
-        comment.setText(missionBean.getComment());
-
-        TextView checker = dialogView.findViewById(R.id.checker);
-        checker.setText(missionDetailBean.getChecker());
-
-        TextView result = dialogView.findViewById(R.id.result);
-        result.setText(missionDetailBean.getResult());
-
-        TextView name = dialogView.findViewById(R.id.name);
-        name.setText(missionDetailBean.getArea().getName());
-
-        TextView code = dialogView.findViewById(R.id.code);
-        code.setText(missionDetailBean.getArea().getCode());
-
-        customizeDialog.show();
-
-    }
+//    private void justShowMissionDialog(final String day) {
+//
+//        AlertDialog.Builder customizeDialog =
+//                new AlertDialog.Builder(MissionListActivity.this);
+//        final View dialogView = LayoutInflater.from(MissionListActivity.this)
+//                .inflate(R.layout.dialog_mission,null);
+//        customizeDialog.setTitle("请核查此次巡检任务的相关信息");
+//        customizeDialog.setView(dialogView);
+//        customizeDialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int i) {
+//
+//            }
+//        });
+//        customizeDialog.setPositiveButton("开始巡检",
+//                new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        Intent intent = new Intent(MissionListActivity.this, SearchActivity.class);
+//                        intent.putExtra("filePath", day);
+//                        intent.putExtra("missionId", missionDetailBean.getMissionId());
+//                        intent.putExtra("checker", missionDetailBean.getChecker());
+//                        startActivity(intent);
+//                    }
+//                });
+//
+//        TextView maker = dialogView.findViewById(R.id.maker);
+//        maker.setText(missionBean.getMaker());
+//
+//        TextView makeTime = dialogView.findViewById(R.id.makeTime);
+//        makeTime.setText(missionBean.getMakeTime());
+//
+//        TextView carryTime = dialogView.findViewById(R.id.carryTime);
+//        carryTime.setText(missionBean.getCarryTime());
+//
+//        TextView deadline = dialogView.findViewById(R.id.deadline);
+//        deadline.setText(missionBean.getDeadline());
+//
+//        TextView comment = dialogView.findViewById(R.id.comment);
+//        comment.setText(missionBean.getComment());
+//
+//        TextView checker = dialogView.findViewById(R.id.checker);
+//        checker.setText(missionDetailBean.getChecker());
+//
+//        TextView result = dialogView.findViewById(R.id.result);
+//        result.setText(missionDetailBean.getResult());
+//
+//        TextView name = dialogView.findViewById(R.id.name);
+//        name.setText(missionDetailBean.getArea().getName());
+//
+//        TextView code = dialogView.findViewById(R.id.code);
+//        code.setText(missionDetailBean.getArea().getCode());
+//
+//        customizeDialog.show();
+//
+//    }
 
     private void showNormalDialog(){
         /* @setIcon 设置对话框图标
@@ -131,7 +151,7 @@ public class MissionListActivity extends AppCompatActivity {
                 new AlertDialog.Builder(MissionListActivity.this);
         normalDialog.setTitle("文件缺失");
         normalDialog.setCancelable(false);
-        normalDialog.setMessage("请导入文件到[ftmtp]！请您退出应用，导入文件成功后，再次进入应用");
+        normalDialog.setMessage("暂无灭火器检查任务，请先导入灭火器巡检任务！");
         normalDialog.setNegativeButton("关闭应用",
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -156,6 +176,7 @@ public class MissionListActivity extends AppCompatActivity {
         }
         String missionJson = Utils.getFileFromSD(dirBase + "/" + missionPath + "/mission/"+sub[0]);//bug
         missionBean = new Gson().fromJson(missionJson, MissionBean.class);
+        missionBeanList.add(missionBean);
 
         String[] subs = Utils.getAllSubFiles(dirBase + "/" + missionPath + "/missionDetail");
         if (subs == null) {
@@ -163,6 +184,7 @@ public class MissionListActivity extends AppCompatActivity {
         }
         String missionDetailJson = Utils.getFileFromSD(dirBase + "/" + missionPath + "/missionDetail/"+subs[0]);//bug
         missionDetailBean = new Gson().fromJson(missionDetailJson, MissionDetailBean.class);
+        missionDetailBeanList.add(missionDetailBean);
         currentDirPath = dirBase + "/" + missionPath+"/";
         return true;
     }
@@ -190,5 +212,14 @@ public class MissionListActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    public void onStart(View view) {
+        int position = listView.getChildAdapterPosition((TableLayout) view.getParent());
+        Intent intent = new Intent(MissionListActivity.this, SearchActivity.class);
+        intent.putExtra("filePath", currentDataPathList.get(position));
+        intent.putExtra("missionId", missionDetailBeanList.get(position).getMissionId());
+        intent.putExtra("checker", missionDetailBeanList.get(position).getChecker());
+        startActivity(intent);
     }
 }
